@@ -68,3 +68,5 @@ module ByteBatcher
     end
   end
 end
+
+require_relative "byte_batcher/json"
