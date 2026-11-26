@@ -35,6 +35,7 @@ end
 - An item that exceeds the byte limit on its own raises `ByteBatcher::OversizedItemError`. The error exposes a zero-based `index`, `encoded_bytes`, `framed_bytes`, and `max_bytes`.
 - A source, encoder, or oversized-item error stops iteration and discards the batch still being built. Previously yielded payloads stay with the caller.
 - To find a byte boundary, the enumerator may encode one item ahead. It buffers the current payload and that item. An exceptionally large item can allocate its serialized form before the limit is checked. Each enumerator is for one consumer.
+- Each record is encoded once. With linear-time encoders, batching takes time proportional to the record count plus the total encoded bytes.
 
 ## Tests
 
@@ -43,3 +44,7 @@ ruby -Ilib -Itest -e 'Dir["test/*_test.rb"].sort.each { |file| require_relative 
 ```
 
 The tests use Minitest, which ships with standard Ruby releases.
+
+## Benchmark
+
+Run `ruby benchmark/batching.rb` to compare the JSON packer against whole-batch re-encoding and count-only slicing. The script reports throughput, Ruby object allocations per record, peak emitted payload bytes, and payloads that exceed the byte limit. Count-only slicing can exceed the limit. Run results depend on the input and machine.
