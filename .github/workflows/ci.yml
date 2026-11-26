@@ -35,3 +35,16 @@ jobs:
         run: ruby -Ilib -Itest -e 'Dir["test/*_test.rb"].sort.each { |file| require_relative file }'
       - name: Build gem
         run: gem build byte_batcher.gemspec
+
+  required:
+    name: Ruby CI
+    needs: test
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Require every test and build job to pass
+        env:
+          MATRIX_RESULT: ${{ needs.test.result }}
+        run: test "$MATRIX_RESULT" = success
